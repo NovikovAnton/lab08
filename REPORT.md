@@ -1,136 +1,103 @@
-## Laboratory work III
+Laboratory work V
 
-Данная лабораторная работа посвещена изучению систем контроля версий на примере **Git**.
+Данная лабораторная работа посвещена изучению систем непрерывной интеграции на примере сервиса Travis CI
 
-```bash
-$ open https://git-scm.com
-```
+$ open https://travis-ci.org
 
-## Tasks
+Tasks
 
-- [x] 1. Создать публичный репозиторий с названием **lab03** и с лиценцией **MIT**
-- [x] 2. Ознакомиться со ссылками учебного материала
-- [x] 3. Выполнить инструкцию учебного материала
-- [x] 4. Составить отчет и отправить ссылку личным сообщением в **Slack**
+  [x]  1. Авторизоваться на сервисе Travis CI с использованием GitHub аккаунта
+  [x]  2. Создать публичный репозиторий с названием lab05 на сервисе GitHub
+  [x]  3. Ознакомиться со ссылками учебного материала
+  [x]  4. Включить интеграцию сервиса Travis CI с созданным репозиторием
+  [x]  5. Получить токен для Travis CLI с правами repo и user
+  [x]  6. Получить фрагмент вставки значка сервиса Travis CI в формате Markdown
+  [x]  7. Установить Travis CLI
+  [x]  8. Выполнить инструкцию учебного материала
+  [x]  9. Составить отчет и отправить ссылку личным сообщением в Slack
 
-## Tutorial
+Tutorial
 
-```ShellSession
-$ export GITHUB_USERNAME=NovikovAnton # Установка значения GITHUB_USERNAME
-$ export GITHUB_EMAIL=jNova916@bk.ru # Установка значения GITHUB_EMAIL
-$ alias edit=vim # Настройка текстового редактора
-```
+$ export GITHUB_USERNAME=TalkedDevotee # Установка значения GITHUB_USERNAME
+$ export GITHUB_TOKEN=fd484403717c403ba255b7955775863d # Установка значения GITHUB_TOKEN
 
-```ShellSession
-$ mkdir lab03 && cd lab03 # Создание папки lab03 и переходим туда
-$ git init # Процесс инициализации
-$ git config --global user.name ${GITHUB_USERNAME} # Прописка GITHUB_USERNAME в файл .gitconfig
-$ git config --global user.email ${GITHUB_EMAIL} # Прописка GITHUB_EMAIL в файл .gitconfig
-$ git config -e --global # Проверка файла через текстовый редактор nano
-$ git remote add origin https://github.com/${GITHUB_USERNAME}/lab03 # Добавление удаленного репозитория
-$ git pull origin master # Извлечение и заполнение данного рпозитория
-$ touch README.md # Создание файла
-$ git status # Состояние проекта
-$ git add README.md # Добавление файла в коммит
-$ git commit -m"added README.md" # коммит файла
-$ git push origin master # Загрузка в репозиторий
-```
+Скачиваем предыдущую лабораторную работу в папку lab05 и переходим туда.
 
-Добавить на сервисе **GitHub** в репозитории **lab03** файл **.gitignore**
-со следующем содержимом:
+$ git clone https://github.com/${GITHUB_USERNAME}/lab04 lab05
+$ cd lab05
+$ git remote remove origin
+$ git remote add origin https://github.com/${GITHUB_USERNAME}/lab05
 
-```ShellSession
-*build*/
-*install*/
-*.swp
-```
+Создаем файл .travis.yml для интеграции сервиса travis-ci.org с GitHub.com.
 
-```ShellSession
-$ git pull origin master
-$ git log # Лог процесса гита
-```
-
-```ShellSession
-$ mkdir sources # Создание папки sources
-$ mkdir include # Создание папки include
-$ mkdir examples # Создание папки examples
-$ cat > sources/print.cpp <<EOF
-#include <print.hpp>
-
-void print(const std::string& text, std::ostream& out) {
-  out << text;
-}
-
-void print(const std::string& text, std::ofstream& out) {
-  out << text;
-}
+$ cat > .travis.yml <<EOF
+language: cpp
 EOF
-```
 
-```ShellSession
-$ cat > include/print.hpp <<EOF
-#include <string>
-#include <fstream>
-#include <iostream>
+$ cat >> .travis.yml <<EOF
 
-void print(const std::string& text, std::ostream& out = std::cout);
-void print(const std::string& text, std::ofstream& out);
+script:
+- cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install
+- cmake --build _build
+- cmake --build _build --target install
 EOF
-```
 
-```ShellSession
-$ cat > examples/example1.cpp <<EOF
-#include <print.hpp>
+$ cat >> .travis.yml <<EOF
 
-int main(int argc, char** argv) {
-  print("hello");
-}
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+    packages:
+      - cmake
+      - cmake-data
 EOF
-```
 
-```ShellSession
-$ cat > examples/example2.cpp <<EOF
-#include <fstream>
-#include <print.hpp>
+Подключаем travisк GitHub. Если все прошло успешно, значит, связь для интеграции установлена.
 
-int main(int argc, char** argv) {
-  std::ofstream file("log.txt");
-  print(std::string("hello"), file);
-}
-EOF
-```
+$ travis login --github-token ${GITHUB_TOKEN} # Аутентификация и сохранение token от GitHub
 
-```ShellSession
-$ edit README.md # Редактор файла
-```
+$ travis lint # Включаем отображение предупреждений для .travis.yml
 
-```ShellSession
-$ git status # Проверка состояния проекта
-$ git add . # Добавление всех существующих файлов
-$ git commit -m"added sources" # Коммит всех файлов
-$ git push origin master # Загрузка в репозиторий
-```
+Добавляем значок статуса в файл README.md для того, чтобы узнавать, установлена ли связь между travis и GitHub.
 
-## Report
+$ ex -sc '1i|<фрагмент_вставки_значка>' -cx README.md # Вставляем значок travis-ci.org для статуса
 
-```ShellSession
-$ cd ~/workspace/labs/ # Переход в папку labs
-$ export LAB_NUMBER=03 # Установка значения LAB_NUMBER
-$ git clone https://github.com/tp-labs/lab${LAB_NUMBER} tasks/lab${LAB_NUMBER} #Загрузка гита с github.com
-$ mkdir reports/lab${LAB_NUMBER} # Переход в lab03
-$ cp tasks/lab${LAB_NUMBER}/README.md reports/lab${LAB_NUMBER}/REPORT.md # Копирование файла в папку
-$ cd reports/lab${LAB_NUMBER} # Переход в папку lab03
-$ edit REPORT.md # Редактор файла
-$ gistup -m "lab${LAB_NUMBER}" # Коммит файла
-```
+Выбираем два файла и коммитируем их.
 
-## Links
+$ git add .travis.yml # Добавляем файл для коммита
+$ git add README.md # Добавляем файл для коммита
+$ git commit -m"added CI" # Коммитируем гит
+$ git push origin master # Загружаем гит на сервер
 
-- [GitHub](https://github.com)
-- [Bitbucket](https://bitbucket.org)
-- [Gitlab](https://about.gitlab.com)
-- [LearnGitBranching](http://learngitbranching.js.org/)
+Проводим процедуру travis.
 
-```
+$ travis lint # Включаем отображение предупреждений для .travis.yml
+$ travis accounts # Отображает учетную запись и её подписку
+$ travis sync # Синхронизируется с GitHub
+$ travis repos # Просматривает список репозиториев на разрешение для синхронизации
+$ travis enable # Подключает проект
+$ travis whatsup # Перечисляет обновленные сборки проекта
+$ travis branches # Отображает обновленную версию сборки проекта
+$ travis history # Отображает процесс создания проекта
+$ travis show # Отображает проект
+
+Report
+
+$ cd ~/workspace/labs/
+$ export LAB_NUMBER=05
+$ git clone https://github.com/tp-labs/lab${LAB_NUMBER} tasks/lab${LAB_NUMBER}
+$ mkdir reports/lab${LAB_NUMBER}
+$ cp tasks/lab${LAB_NUMBER}/README.md reports/lab${LAB_NUMBER}/REPORT.md
+$ cd reports/lab${LAB_NUMBER}
+$ edit REPORT.md
+$ gistup -m "lab${LAB_NUMBER}"
+
+Links
+
+    Travis Client
+    AppVeyour
+    GitLab CI
+
 Copyright (c) 2017 Братья Вершинины
-```
+
